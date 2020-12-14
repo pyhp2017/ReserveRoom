@@ -7,6 +7,13 @@ const Op = db.Sequelize.Op;
 
 
 exports.reserve = (req,res)=>{
+    var dstart = new Date(req.body.startDate);
+    var dend = new Date(req.body.endDate);
+    if(dstart >= dend)
+    {
+        res.status(300).json({message:"What the **** ?"});
+        return;
+    }
     //Check if it exists
     Reserve.findAll({
         where:{
@@ -20,7 +27,7 @@ exports.reserve = (req,res)=>{
             }
         }
     }).then(reserves=>{
-        if(reserves)
+        if(reserves.length != 0)
         {
             res.status(300).json({message:"time is reserved!"});
             return;

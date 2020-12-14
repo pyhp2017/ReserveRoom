@@ -20,9 +20,11 @@ app.use(bodyParser.urlencoded({extended:true}));
 
 
 //Just For Development :
-db.sequelize.sync({force:true}).then(()=>{
-    console.log("Drop and Resync Db");
-});
+// db.sequelize.sync({force:true}).then(()=>{
+//     console.log("Drop and Resync Db");
+// });
+
+db.sequelize.sync();
 
 
 //Route to main path

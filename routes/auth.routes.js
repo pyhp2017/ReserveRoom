@@ -1,6 +1,5 @@
 const {verifySignup} = require("../middleware")
 const controller = require("../controllers/auth.controller")
-// const 
 
 module.exports = (app)=>{
     app.use((req,res,next)=>{
@@ -10,7 +9,6 @@ module.exports = (app)=>{
           );
           next();
     });
-    
-    app.post("/api/auth/signup",[verifySignup.usernameOrEmailExists,verifySignup.roleExists],controller.signup);
+    app.post("/api/auth/signup",[verifySignup.usernameOrEmailExists],controller.signup);
     app.post("/api/auth/signin",controller.signin);
 };

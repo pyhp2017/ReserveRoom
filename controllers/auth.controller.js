@@ -3,7 +3,7 @@ var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 //import files
 const db = require("../models");
-const config = require("../config/auth.cofig");
+const config = require("../config/auth.config");
 //get database objects
 const User = db.user;
 
