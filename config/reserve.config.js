@@ -1,4 +1,3 @@
 module.exports = {
-    reserveStartsFrom:"",
-    reserveEndsIn = ""
+    time_period : 2
 };

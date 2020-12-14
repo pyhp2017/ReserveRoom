@@ -4,6 +4,8 @@ const db = require("../models");
 const Reserve = db.reserve;
 //Operator Object
 const Op = db.Sequelize.Op;
+//Config Module
+const config = require('../config/reserve.config.js');
 
 
 exports.reserve = (req,res)=>{
@@ -12,6 +14,12 @@ exports.reserve = (req,res)=>{
     if(dstart >= dend)
     {
         res.status(300).json({message:"What the **** ?"});
+        return;
+    }
+    //check period
+    if(!((dend.getSeconds()-dstart.getSeconds() == 0) && (dend.getMinutes()-dstart.getMinutes() == 0) && (dend.getHours()-dstart.getHours() == config.time_period) && (dend.getDay() == dstart.getDay()) && (dend.getMonth() == dstart.getMonth()) && (dend.getFullYear() == dstart.getFullYear()) ))
+    {
+        res.status(300).json({message:"Input is not in period"});
         return;
     }
     //Check if it exists
