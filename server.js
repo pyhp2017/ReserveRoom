@@ -30,6 +30,9 @@ app.get('/',(req,res)=>{
     res.json({message:"Welcome to main Page"})
 });
 
+//Route
+require('./routes/auth.routes.js')(app);
+require('./routes/reserve.routes.js')(app);
 
 //Set Port and Start Listening
 const port = 8080;
