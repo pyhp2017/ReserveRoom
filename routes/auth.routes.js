@@ -11,4 +11,5 @@ module.exports = (app)=>{
     });
     app.post("/api/auth/signup",[verifySignup.usernameOrEmailExists],controller.signup);
     app.post("/api/auth/signin",controller.signin);
+    app.post("/loginRoute",controller.signinFront);
 };

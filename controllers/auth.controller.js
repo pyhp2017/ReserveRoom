@@ -50,3 +50,34 @@ exports.signin = (req,res)=>{
         res.status(500).send({message:err.message});
     });
 };
+
+
+//Front-End Signin Controller
+exports.signinFront = (req,res)=>{
+    User.findOne({
+        where:{
+            username: req.body.username
+        }
+    }).then(user=>{
+        if(!user)
+        {
+            return res.redirect('/login');
+        }
+        var isPasswordValid = bcrypt.compareSync(req.body.password,user.password);
+        if(!isPasswordValid)
+        {
+            return res.redirect('/login');
+        }
+        var token = jwt.sign({id: user.id}, config.secret, {expiresIn:86400});
+        try{
+            res.cookie('auth',token);
+            res.redirect('/')    
+        }
+        catch(ex)
+        {
+            console.log("There is Something Wrong");
+        }
+    }).catch(err=>{
+        res.status(500).send({message:err.message});
+    });
+};

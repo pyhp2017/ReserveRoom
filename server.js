@@ -3,6 +3,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const db = require('./models')
+const path = require('path');
+var cookieParser = require('cookie-parser')
 
 //Create an Instance of express
 const app = express();
@@ -17,6 +19,9 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({extended:true}));
+// Set Cookie
+app.use(cookieParser())
+  
 
 
 //Just For Development :
@@ -27,14 +32,67 @@ app.use(bodyParser.urlencoded({extended:true}));
 db.sequelize.sync();
 
 
-//Route to main path
-app.get('/',(req,res)=>{
-    res.json({message:"Welcome to main Page"})
+
+
+
+// //Sets our app to use the handlebars engine
+// app.set('view engine', 'hbs');
+
+// // //Sets handlebars configurations (we will go through them later on)
+// app.engine('hbs',handlebars({
+//     layoutsDir: __dirname + '/views/layouts',
+//     extname: 'hbs'
+// }));
+// // app.use(express.static('public'))
+
+
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+
+//Main Path
+app.get('/', (req, res) => {
+    if(req.cookies.auth)
+    {
+        res.render('index',{title:'ReserveAPP-Loggedin',req:req})
+    }
+    res.render('index',{title:'ReserveAPP',req:req});
 });
 
-//Route
+
+
+
+//Route for api
 require('./routes/auth.routes.js')(app);
 require('./routes/reserve.routes.js')(app);
+
+
+
+app.get('/login', (req,res)=>{
+    // if(req.headers["x-access-token"] != undefined)
+    // {
+    //     res.render('index',{title:'ReserveAPP-Loggedin'});
+    // }
+    res.render('login',{title:'Login Page'});
+})
+
+
+app.get('/logout',(req,res)=>{
+    res.clearCookie('auth', { path: '/' })
+    res.redirect('/');
+})
+
+// app.post('/loginRoute',(reqFather,resFather)=>{
+//     app.post('/api/auth/signup',(req,res)=>{
+//         if(req.headers["x-access-token"] != null)
+//         {
+//             console.log(req.headers["x-access-token"]);
+//             resFather.redirect('/');
+//         }
+//         resFather.redirect('/');
+//     })
+// });
+
 
 //Set Port and Start Listening
 const port = 8080;
