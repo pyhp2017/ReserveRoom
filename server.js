@@ -33,19 +33,6 @@ db.sequelize.sync();
 
 
 
-
-
-// //Sets our app to use the handlebars engine
-// app.set('view engine', 'hbs');
-
-// // //Sets handlebars configurations (we will go through them later on)
-// app.engine('hbs',handlebars({
-//     layoutsDir: __dirname + '/views/layouts',
-//     extname: 'hbs'
-// }));
-// // app.use(express.static('public'))
-
-
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -69,29 +56,17 @@ require('./routes/reserve.routes.js')(app);
 
 
 app.get('/login', (req,res)=>{
-    // if(req.headers["x-access-token"] != undefined)
-    // {
-    //     res.render('index',{title:'ReserveAPP-Loggedin'});
-    // }
     res.render('login',{title:'Login Page'});
 })
 
+app.get('/signup',(req,res)=>{
+    res.render('signup');
+})
 
 app.get('/logout',(req,res)=>{
     res.clearCookie('auth', { path: '/' })
     res.redirect('/');
 })
-
-// app.post('/loginRoute',(reqFather,resFather)=>{
-//     app.post('/api/auth/signup',(req,res)=>{
-//         if(req.headers["x-access-token"] != null)
-//         {
-//             console.log(req.headers["x-access-token"]);
-//             resFather.redirect('/');
-//         }
-//         resFather.redirect('/');
-//     })
-// });
 
 
 //Set Port and Start Listening
