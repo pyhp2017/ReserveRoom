@@ -1,6 +1,20 @@
 const jwt = require("jsonwebtoken");
 const config = require("../config/auth.config.js");
 
+
+isValidToken = (token)=>
+{
+    var valid = true;
+    jwt.verify(token,config.secret,(error,decoded)=>{
+        if(error)
+        {
+            console.log("Error is " + JSON.stringify(error))
+            valid = false;
+        }
+    });
+    return valid;
+}
+
 verifyToken = (req,res,next)=>{
     let token = req.headers["x-access-token"];
     if(!token)//header didn't exist
@@ -23,7 +37,8 @@ verifyToken = (req,res,next)=>{
 
 
 const authJwt = {
-    verifyToken: verifyToken
+    verifyToken: verifyToken,
+    isValidToken: isValidToken
 };
 
 module.exports = authJwt;

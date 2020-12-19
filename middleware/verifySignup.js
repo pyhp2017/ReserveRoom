@@ -1,7 +1,7 @@
 const db = require("../models");
 const User = db.user;
 
-usernameOrEmailExists = (req,res,next)=>{
+function check(req,res){
     User.findOne({
         where: {
             username: req.body.username
@@ -9,10 +9,8 @@ usernameOrEmailExists = (req,res,next)=>{
     }).then(user=>{
         if(user)
         {
-            res.status(400).send({
-                message: "Failed! Username is already in use!"
-            });
-            return;
+            console.log("USER")
+            return false;
         }
         User.findOne({
             where:{
@@ -21,19 +19,44 @@ usernameOrEmailExists = (req,res,next)=>{
         }).then(email=>{
             if(email)
             {
-                res.status(400).send({
-                    message: "Failed! Email is already in use!"
-                });
-                return;
+                console.log("Email")
+                return false;
             }
-            next();
         });
     });
+    return true;
+}
+
+
+usernameOrEmailExists = (req,res,next)=>{
+    if(!check(req,res))
+    {
+        res.status(400).send({
+        message: "Failed! Email Or Username is already in use!"
+        });
+        return;
+    }
+    else
+    {
+        next();
+    }
 };
+
+usernameOrEmailExistsFront = (req,res,next)=>{
+    if(!check(req,res))
+    {
+        res.redirect('/signup');
+    }
+    else
+    {
+        next();
+    }
+}
 
 
 const verifySignup = {
-    usernameOrEmailExists : usernameOrEmailExists
+    usernameOrEmailExists : usernameOrEmailExists,
+    usernameOrEmailExistsFront: usernameOrEmailExistsFront
 };
 
 module.exports = verifySignup;

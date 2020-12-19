@@ -20,6 +20,18 @@ exports.signup = (req,res)=>{
     });
 };
 
+exports.signupFront = (req,res)=>{
+    User.create({
+        username: req.body.username,
+        email: req.body.email,
+        password: bcrypt.hashSync(req.body.password,8)
+    }).then(user =>{
+        return res.redirect('/login');
+    }).catch(err=>{
+        return res.redirect('/signup');
+    });
+};
+
 //Signin controller
 exports.signin = (req,res)=>{
     User.findOne({
@@ -70,7 +82,7 @@ exports.signinFront = (req,res)=>{
         }
         var token = jwt.sign({id: user.id}, config.secret, {expiresIn:86400});
         try{
-            res.cookie('auth',token);
+            res.cookie('auth',token,{maxAge:86400});
             res.redirect('/')    
         }
         catch(ex)

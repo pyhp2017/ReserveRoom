@@ -2,12 +2,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+var cookieParser = require('cookie-parser')
+const tokenValidModule = require('./middleware/authJwt')
 const db = require('./models')
 const path = require('path');
-var cookieParser = require('cookie-parser')
 
 //Create an Instance of express
 const app = express();
+
 
 //set cors options
 var corsOptions = {
@@ -19,9 +21,9 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({extended:true}));
-// Set Cookie
+// Set Cookie Parser
 app.use(cookieParser())
-  
+
 
 
 //Just For Development :
@@ -39,11 +41,17 @@ app.set('views', path.join(__dirname, 'views'));
 
 //Main Path
 app.get('/', (req, res) => {
-    if(req.cookies.auth)
+    var booleanToken = tokenValidModule.isValidToken(req.cookies.auth);
+    if(req.cookies.auth&&booleanToken)
     {
-        res.render('index',{title:'ReserveAPP-Loggedin',req:req})
+        console.log("VALID")
+        res.render('index',{title:'ReserveAPP-Loggedin',token:true})    
     }
-    res.render('index',{title:'ReserveAPP',req:req});
+    else
+    {
+        console.log("Not Valid");
+        res.render('index',{title:'ReserveAPP',token:false});
+    }
 });
 
 
@@ -56,21 +64,42 @@ require('./routes/reserve.routes.js')(app);
 
 
 app.get('/login', (req,res)=>{
-    res.render('login',{title:'Login Page'});
+    var booleanToken = tokenValidModule.isValidToken(req.cookies.auth);
+    if(!(req.cookies.auth && booleanToken))
+    {
+        res.render('login',{title:'Login Page'});
+    }
+    else
+    {
+        res.redirect('/');
+    }
 })
 
 app.get('/signup',(req,res)=>{
-    res.render('signup');
+    var booleanToken = tokenValidModule.isValidToken(req.cookies.auth);
+    if(!(req.cookies.auth && booleanToken))
+    {
+        res.render('signup');
+    }
+    try
+    {
+        res.redirect('/');
+    }
+    catch(ex){}
 })
 
 app.get('/logout',(req,res)=>{
-    res.clearCookie('auth', { path: '/' })
+    var booleanToken = tokenValidModule.isValidToken(req.cookies.auth);
+    if(req.cookies.auth && booleanToken)
+    {
+        res.clearCookie('auth', { path: '/' })
+    }
     res.redirect('/');
 })
 
 
 //Set Port and Start Listening
-const port = 8080;
+const port = 9090;
 app.listen(port,()=>{
     console.log('Serve is running on port: ' + port);
 });

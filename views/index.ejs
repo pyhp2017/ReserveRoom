@@ -7,21 +7,29 @@
 <div class="container">
   <div class="row">
     <div class="col-sm-4">
-      <% if(req.cookies.auth){ %>
+      <% if(token){ %>
         <h3>You are logged in</h3>
-        <p><a href="/logout">logut</a></p>  
+        <p><a href="/logout">logout</a></p>  
       <% } else { %>
       <h3>Login</h3>
       <p><a href="/login">Login</a></p>
       <% } %>
     </div>
     <div class="col-sm-4">
-      <h3>Signup</h3>
-      <p><a href="/signup">Signup</a></p>
+      <% if(token) { %>
+        <h3>You are Logged in</h3>
+      <% } else { %>
+        <h3>Signup</h3>
+        <p><a href="/signup">Signup</a></p>  
+      <% } %>
     </div>
     <div class="col-sm-4">
-      <h3>Reserve</h3>
-      <p><a href="#">Reserve</a></p>
+      <% if(token) { %>
+        <h3>Reserve</h3>
+        <p><a href="#">Reserve</a></p>  
+      <% } else { %>
+        <h3>Please Login First</h3>  
+      <% } %>
     </div>
   </div>
 </div>
