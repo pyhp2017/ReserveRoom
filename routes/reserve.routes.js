@@ -11,5 +11,7 @@ module.exports = (app)=>{
         next();
     });
 
+    // app.get("/api/reserve", [authJwt.verifyToken] )
     app.post("/api/reserve" , [authJwt.verifyToken] , controller.reserve);
+    app.get("/api/reserves", [authJwt.verifyToken] , controller.getReserves)
 }

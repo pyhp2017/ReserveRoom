@@ -3,7 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 var cookieParser = require('cookie-parser')
-const tokenValidModule = require('./middleware/authJwt')
+var tokenValidModule = require('./middleware/authJwt')
 const db = require('./models')
 const path = require('path');
 
@@ -95,6 +95,18 @@ app.get('/logout',(req,res)=>{
         res.clearCookie('auth', { path: '/' })
     }
     res.redirect('/');
+});
+
+app.get('/reserve' , (req,res)=>{
+    var booleanToken = tokenValidModule.isValidToken(req.cookies.auth);
+    if(req.cookies.auth&&booleanToken)
+    {
+        res.render('reserve');
+    }
+    else
+    {
+        res.redirect('/');
+    }
 })
 
 

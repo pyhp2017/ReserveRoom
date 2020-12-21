@@ -1,0 +1,179 @@
+<%- include('header'); -%>
+
+<%
+    //get all days in this week (from now)
+    var days = [];
+    for(var i=0; i<7; i++)
+    {
+        var d = new Date();
+        d.setDate(d.getDate()+i);
+        var dayName = d.toString().split(' ')[0];
+        days.push(dayName);
+    }
+    var hours = [8,10,12,14,16,18,20];
+%>
+
+
+<script>
+    $(document).ready(function(){
+
+        var userId;
+
+        function changeButtonState(buttonID,me)
+        {
+            if(me)
+            {
+                $("#"+buttonID).attr("class","btn btn-primary");
+            }
+            else
+            {
+                $("#"+buttonID).attr("class","btn btn-danger");
+            }
+            $("#"+buttonID).attr("disabled","true");
+            $("#"+buttonID).text("Reserved");
+        }
+        
+        function changeTimezone(date, ianatz) {
+            // suppose the date is 12:00 UTC
+            var invdate = new Date(date.toLocaleString('en-US', {timeZone: ianatz}));
+            // then invdate will be 07:00 in Toronto
+            // and the diff is 5 hours
+            var diff = date.getTime() - invdate.getTime();
+            // so 12:00 in Toronto is 17:00 UTC
+            return new Date(date.getTime() - diff); // needs to substract
+        }
+
+
+        $.ajaxSetup({
+            beforeSend: function(xhr) {
+            xhr.setRequestHeader('x-access-token', Cookies.get("auth"));
+            }
+        });
+
+
+        $.ajax({
+        url: '/api/reserves',
+        success: function(result) 
+        {
+            var reserved = [];
+            userId = result[result.length-1].userId;
+            for(var i=0; i<result.length-1; i++)
+            {
+                var tempStartDate = new Date(result[i].start_date);
+                tempStartDate = changeTimezone(tempStartDate,"UTC");
+                var tempDayName = tempStartDate.toString().split(' ')[0];
+                var tempHour = tempStartDate.getHours();
+                let isMe = false;
+                if(result[i].user_id == userId)
+                {
+                    isMe = true;   
+                }
+                changeButtonState(tempDayName+'-'+tempHour,isMe);
+            }
+        },
+        error: function() {alert("Error")}
+        });
+
+
+        $("button").click(function(){
+            //Disable Button While trying to post data
+            $(this).attr("disabled","true");
+
+            var buttonid = $(this).attr('id');
+            var day = buttonid.split('-')[0];
+            var startHour = buttonid.split('-')[1];
+            var days = [];
+            var reserveDate;
+            for(var i=0; i<7; i++)
+            {
+                var d = new Date();
+                // d.getDay
+                d.setDate(d.getDate()+i);
+                var dayName = d.toString().split(' ')[0];
+                days.push({
+                    dayName: dayName,
+                    fullDate: changeTimezone(d,"UTC")
+                });
+            }
+            for(var i=0; i<days.length; i++)
+            {
+                if(days[i].dayName==day)
+                {
+                    reserveDate = days[i].fullDate;
+                    break;
+                }
+            }
+
+            var startDate = reserveDate.getFullYear()+'-'+(reserveDate.getMonth()+1)+'-'+reserveDate.getDate()+' '+ startHour + ':00:00';            
+            var endDate = reserveDate.getFullYear()+'-'+(reserveDate.getMonth()+1)+'-'+reserveDate.getDate()+' '+ (parseInt(startHour)+2) + ':00:00';
+            $.ajax({
+                method: "POST",
+                url: '/api/reserve',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                data: JSON.stringify({"startDate":startDate,"endDate":endDate}),
+                success: function(result){
+                    alert("successfully reserved");
+                    changeButtonState(buttonid,true)
+                },
+                error: function(response) {
+                    alert("There is Something Wrong");
+                    $("#"+buttonID).attr("disabled","false");
+                }
+            });
+        });
+
+
+    })
+</script>
+
+<style type="text/css">
+    .tg  {border-collapse:collapse;border-spacing:0;}
+    .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+      overflow:hidden;padding:10px 20px;word-break:normal;}
+    .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+      font-weight:normal;overflow:hidden;padding:10px 20px;word-break:normal;}
+    .tg .tg-baqh{text-align:center;vertical-align:top}
+    </style>
+    <table class="tg">
+    <thead>
+      <tr>
+        <th class="tg-baqh">DaySat/Time<br></th>
+        <%
+            for(var i=0; i<days.length; i++)
+            { %>
+                <td class="tg-baqh"><%= days[i] %></td>
+        <%
+            }
+        %>
+      </tr>
+    </thead>
+    <tbody>
+
+
+
+
+        <%
+            for(var i=0; i<hours.length; i++)
+            {
+        %>
+            <tr>
+                <td class="tg-baqh"><%= (hours[i] + " - " + (hours[i]+2)) %></td>  
+        <%
+            for(var j=0; j<days.length; j++)
+            {
+        %>
+            <td><button type="submit" class="btn btn-success" id="<%= (days[j]+'-'+hours[i]) %>">Reserve</button></td>
+        <%
+            }
+        %>
+            </tr>
+        <%
+            }
+        %>
+    </tbody>
+    </table>
+
+
+<%- include('footer'); -%>

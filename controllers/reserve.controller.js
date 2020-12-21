@@ -8,10 +8,22 @@ const Op = db.Sequelize.Op;
 const config = require('../config/reserve.config.js');
 
 
+function changeTimezone(date, ianatz) {
+    // suppose the date is 12:00 UTC
+    var invdate = new Date(date.toLocaleString('en-US', {timeZone: ianatz}));
+    // then invdate will be 07:00 in Toronto
+    // and the diff is 5 hours
+    var diff = date.getTime() - invdate.getTime();
+    // so 12:00 in Toronto is 17:00 UTC
+    return new Date(date.getTime() - diff); // needs to substract
+}
+
+
 exports.reserve = (req,res)=>{
     var dstart = new Date(req.body.startDate);
     var dend = new Date(req.body.endDate);
     var now = new Date();
+    now = changeTimezone(now,"Asia/Tehran");
     let diff = Math.abs(dend.getTime() - now.getTime());
     if(dstart >= dend)
     {
@@ -19,9 +31,8 @@ exports.reserve = (req,res)=>{
         return;
     }
     //check period
-    if(!((dend.getSeconds()-dstart.getSeconds() == 0) && (dend.getMinutes()-dstart.getMinutes() == 0) && (dend.getHours()-dstart.getHours() == config.time_period) && (dend.getDay() == dstart.getDay()) && (dend.getMonth() == dstart.getMonth()) && (dend.getFullYear() == dstart.getFullYear()) ))
+    if(!((dend.getSeconds()-dstart.getSeconds() == 0) && (dend.getMinutes()-dstart.getMinutes() == 0) && (dend.getHours()-dstart.getHours() == config.time_period) && (dend.getDate() == dstart.getDate()) && (dend.getMonth()+1 == dstart.getMonth()+1) && (dend.getFullYear() == dstart.getFullYear()) ))
     {
-        
         res.status(300).json({message:"Input is not in period"});
         return;
     }
@@ -30,16 +41,25 @@ exports.reserve = (req,res)=>{
         res.status(300).json({message:"Must be in this week"});
         return;
     }
+    let tempDateStart = new Date(dstart.getTime());
+    let tempNow = new Date();
+    tempDateStart.setHours(0,0,0,0);
+    tempNow.setHours(0,0,0,0);
+    if((tempDateStart.getTime()==tempNow.getTime()) && ((dstart.getHours() < now.getHours()) || ((dstart.getHours()==now.getHours()) && dstart.getMinutes() < now.getMinutes())))
+    {
+        res.status(300).json({message:"Time passed"});
+        return;
+    }
     //Check if it exists
     Reserve.findAll({
         where:{
             // end_date >= req.body.startDate,
             // start_date <= req.body.endDate
             end_date: {
-                [Op.gte]: req.body.startDate
+                [Op.gt]: req.body.startDate
             },
             start_date: {
-                [Op.lte]: req.body.endDate
+                [Op.lt]: req.body.endDate
             }
         }
     }).then(reserves=>{
@@ -61,4 +81,24 @@ exports.reserve = (req,res)=>{
     }).catch(err=>{
         res.status(500).send({message:err.message});
     });
+}
+
+exports.getReserves = async(req,res)=>{
+    var now = new Date();
+    now.setHours(0,0,0,0);
+    var reserves = await Reserve.findAll();
+    var result = [];
+    for(var i=0; i<reserves.length; i++)
+    {
+        let startDate = new Date(reserves[i].start_date);
+        startDate.setHours(0,0,0,0);
+        if(startDate >= now)
+        {
+            result.push(reserves[i]);
+        }
+    }
+    result.push({
+        userId: req.userId
+    });
+    return res.status(200).send(result);
 }
