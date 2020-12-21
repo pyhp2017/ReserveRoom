@@ -16,9 +16,8 @@
 
 <script>
     $(document).ready(function(){
-
+        $(this).attr("class","text-center");
         var userId;
-
         function changeButtonState(buttonID,me)
         {
             if(me)
@@ -124,7 +123,6 @@
             });
         });
 
-
     })
 </script>
 
@@ -136,14 +134,14 @@
       font-weight:normal;overflow:hidden;padding:10px 20px;word-break:normal;}
     .tg .tg-baqh{text-align:center;vertical-align:top}
     </style>
-    <table class="tg">
-    <thead>
+    <table class="tg table" style="text-align: center;">
+    <thead class="thead-dark">
       <tr>
         <th class="tg-baqh">DaySat/Time<br></th>
         <%
             for(var i=0; i<days.length; i++)
             { %>
-                <td class="tg-baqh"><%= days[i] %></td>
+                <td class="tg-baqh" scope='col'><%= days[i] %></td>
         <%
             }
         %>
@@ -155,6 +153,9 @@
 
 
         <%
+            //Disable Passed Times
+            var now = new Date();
+
             for(var i=0; i<hours.length; i++)
             {
         %>
@@ -163,9 +164,16 @@
         <%
             for(var j=0; j<days.length; j++)
             {
+                var disable = false;
+                // new Date().getHours()
+                if((now.toString().split(' ')[0] == days[j]) && (now.getHours() > hours[i]))
+                {
+                    disable = true;
+                }
         %>
-            <td><button type="submit" class="btn btn-success" id="<%= (days[j]+'-'+hours[i]) %>">Reserve</button></td>
+            <td><button type="submit" <%= disable ? "disabled" : "" %> class="btn btn-success" id="<%= (days[j]+'-'+hours[i]) %>">Reserve</button></td>
         <%
+                
             }
         %>
             </tr>
@@ -175,5 +183,8 @@
     </tbody>
     </table>
 
+    <form action="/">
+        <input type="submit" value="Go To Main" />
+    </form>
 
 <%- include('footer'); -%>
