@@ -1,13 +1,10 @@
 # Reserve Room
 ========
-
-
 This is a Simple API Based Web Application to reserve meeting rooms.
 
 
 # Features
 --------
-
 - Api Based
 - Using Regex
 - MVC
@@ -30,7 +27,7 @@ we have serveral directories and files. let's talk about them:
 2- Middleware : check token and signup before controller
 3- Controllers : control inputs and validate them for reserve and check login informations
 4- Models : contains Models (User and Resreve) objects with their own fields (Sequelize ORM Objects)
-5- Views : contains all templates and their depandancies (style.css and converter.js). we use these templates late in routing part (Rendering)
+5- Views : contains all templates and their dependencies (style.css and converter.js). we use these templates late in routing part (Rendering)
 6- Routes : Reserve and auth Routes
 
 
@@ -49,21 +46,69 @@ authJwt.js -> this file has two methods :
     1 - isValidToken (Return True or False) -> check if given token is valid or not
     2 - verifyToken (Return Status and Set User ID based on TOKEN)
 
+
 verifySignup.js -> this file has two methods and one function :
     1- check function as it seems, check if given username or email are already taken or not (Return True or False)
     2- usernameOrEmailExists (For API Results) -> use check function and send json message to the use-agent
     3- usernameOrEmailExistsFront (For Front Results) -> use check function and redirect user to proper route
+    TODO : Check email and username validation inputs
 
 index.js -> merge verifySignup and authJwt into one module
 
 
 
-# Controllers
+# Controllers (After Middleware)
 ------------
-auth.controller.js -> this file contains three methods : 
-    1 - signup (For api) : this 
+auth.controller.js -> this file contain three methods: 
+    1 - signup (for api) : create user with given information and return proper json message
+    2 - signupFront (for front) : create user with given information and redirect user to proper route
+
+reserve.controller.js -> this file contain two methods and one function:
+    1 - changeTimezone(Date Object , "TIME ZONE NAME") -> Convert given DateObject to a new DateObject with new timezone
+    2 - reserve -> reserve given date and check validation
+    3 - getReserves -> get all reserves after today (including today)
 
 
-How it works ?
+
+# Models
 ------------
-We have three diffrenet
+user.model.js -> this file contain User Object (ORM Object)
+reserve.model.js -> this file contain Reserve Object (ORM Object)
+index.js -> merge these files into one
+
+
+
+# Views
+------------
+index.ejs -> template for index page
+login.ejs -> template for login page
+signup.ejs -> template for signup page
+reserve.ejs -> template for Reserve Page :
+    We used ajax to get and post reserves (Frontend):
+        for this we have used Jquery Ajax function and pass token from headers
+footer.ejs & headers.ejs -> contain all html and css and javascript frontend dependencies
+Convertjs -> script to convert current date to jalali calender (not used yet)
+style.css -> some styles for html pages
+
+
+
+
+# Routes
+------------
+auth.routes.js -> in this file we handle routes that relates to auth process
+    "/api/auth/signup" (POST METHOD) -> signup in api endpoint. first check if username or email exists or not and then use controller.signup method
+    "/api/auth/signin" (POST METHOD) -> signin user in api endpoint. using controller.signin for doing that
+    "/loginRoute" (POST METHOD) -> signin user in frontend. using controller.signinFront for doing that
+    "/signupRoute" (POST METHOD) -> signup in frontend. first check if username or email exists or not and then use controller.signup method
+
+reserve.routes.js -> in this file we handle routes that relates to reserve process
+    "/api/reserve" (POST METHOD) -> reserve given time after token verify. use controller.reserve
+    "/api/reserves" (GET METHOD) -> get all reserves after today (including) (after token verify). using controller.getReserves
+
+
+
+
+# Server.js
+------------
+we use ejs template engine. for more information: https://ejs.co/#docs
+in every front path before routing we check if user is loggedin or not (using tokenValidModule.isValidToken)
