@@ -1,41 +1,69 @@
-$project
+# Reserve Room
 ========
 
-$project will solve your problem of where to start with documentation,
-by providing a basic explanation of how to do it easily.
 
-Look how easy it is to use:
+This is a Simple API Based Web Application to reserve meeting rooms.
 
-    import project
-    # Get your stuff done
-    project.do_stuff()
 
-Features
+# Features
 --------
 
-- Be awesome
-- Make things faster
+- Api Based
+- Using Regex
+- MVC
+- JWT Token
 
-Installation
+# How to start using it
 ------------
 
-Install $project by running:
+Simply just use following command:
 
-    install project
+    TZ=UTC node server.js
 
-Contribute
-----------
 
-- Issue Tracker: github.com/$project/$project/issues
-- Source Code: github.com/$project/$project
 
-Support
--------
 
-If you are having issues, please let us know.
-We have a mailing list located at: project@google-groups.com
+# Project Skeleton
+------------
+we have serveral directories and files. let's talk about them:
+1- Config : contains all static information for project like database settings and jwt token secret
+2- Middleware : check token and signup before controller
+3- Controllers : control inputs and validate them for reserve and check login informations
+4- Models : contains Models (User and Resreve) objects with their own fields (Sequelize ORM Objects)
+5- Views : contains all templates and their depandancies (style.css and converter.js). we use these templates late in routing part (Rendering)
+6- Routes : Reserve and auth Routes
 
-License
--------
 
-The project is licensed under the BSD license.
+
+# Config
+------------
+auth.config.js -> this file contain JWT Token Secret key and we used this file in auth.Jwt.js and auth.controller.js
+reserve.config.js -> this file contain reserve settings. Resreve Period (time_period) and Maximum Resreve day distance from today (day_period)
+db.config.js -> this file contain all information about our mysql database system (login credits and timezone and pool settings) -> for more information please visite the file
+
+
+
+# Middleware
+------------
+authJwt.js -> this file has two methods :
+    1 - isValidToken (Return True or False) -> check if given token is valid or not
+    2 - verifyToken (Return Status and Set User ID based on TOKEN)
+
+verifySignup.js -> this file has two methods and one function :
+    1- check function as it seems, check if given username or email are already taken or not (Return True or False)
+    2- usernameOrEmailExists (For API Results) -> use check function and send json message to the use-agent
+    3- usernameOrEmailExistsFront (For Front Results) -> use check function and redirect user to proper route
+
+index.js -> merge verifySignup and authJwt into one module
+
+
+
+# Controllers
+------------
+auth.controller.js -> this file contains three methods : 
+    1 - signup (For api) : this 
+
+
+How it works ?
+------------
+We have three diffrenet
